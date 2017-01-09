@@ -1,0 +1,29 @@
+{
+  "name": "authenticateuser2",
+  "version": "1.0.0",
+  "description": "Try basic authentication from exaple based on scotch.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "authentication",
+    "nodejs"
+  ],
+  "author": "sunbee",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "http-status": "^0.2.3",
+    "jsonwebtoken": "^7.2.1",
+    "mocha": "^3.2.0",
+    "mongoose": "^4.7.6",
+    "morgan": "^1.7.0",
+    "superagent": "^3.3.1",
+    "underscore": "^1.8.3",
+    "wagner": "^0.6.4",
+    "wagner-core": "^0.2.0"
+  }
+}
