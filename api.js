@@ -16,22 +16,6 @@ module.exports = function(wagner) {
         };
     }));
     
-    api.get('/users', wagner.invoke(function(User) {
-        return function(req, res) {
-            User.find({}, function(err, docs) {
-               if (err) {
-                    return res
-                            .status(httpStatus.INTERNAL_SERVER_ERROR)
-                            .json({error: err.toString()});
-               } else {
-                   return res
-                            .status(httpStatus.OK)
-                            .json({Users: docs})
-               };
-            });  
-        };    
-    }));
-    
     api.post('/preauthenticate', wagner.invoke(function(User) {
         return function(req, res) {
             User.findOne({name: req.body.name}, function(err, doc) {
@@ -51,7 +35,7 @@ module.exports = function(wagner) {
                     } else {
                         return res
                                 .status(httpStatus.OK)
-                                .json({Credential: doc});
+                                 .json({Credential: doc});
                         
                     };
                 };
@@ -89,5 +73,58 @@ module.exports = function(wagner) {
         };
     }));
     
+    // api.use(wagner.invoke(function() {
+    //     return function(req, res, next) {
+    //         console.log("FROM MIDDLEWARE ***" + req);
+    //         if (req.body) {
+    //             console.log("BODY: " + JSON.stringify(req.body))
+    //         }
+    //         if (req.query) {
+    //             console.log("QUERY: " + JSON.stringify(req.query));
+    //         }
+    //         next(); 
+    //     }
+    // }));
+
+    api.use(function(req, res, next) {
+        var token = req.body.token || req.query.token;
+        
+        if (token) {
+            jsonWebToken.verify(token, 'sodesuka', function(err, decoded) {
+                if (err) {
+                    return res
+                            .status(httpStatus[401])
+                            .json({error: err});
+                } else {
+                    console.log("from ROUTE HANDLER, DECODED: " + decoded);
+                    req.decoded = decoded;
+                    next();
+                }
+            });
+        } else {
+            return res
+                    .status(httpStatus[403]);
+        }
+        
+    });
+    
+    api.get('/users', wagner.invoke(function(User) {
+        return function(req, res) {
+            User.find({}, function(err, docs) {
+               if (err) {
+                    return res
+                            .status(httpStatus.INTERNAL_SERVER_ERROR)
+                            .json({error: err.toString()});
+               } else {
+                   return res
+                            .status(httpStatus.OK)
+                            .json({Users: docs})
+               };
+            });  
+        };    
+    }));
+    
+
+
     return api;
 }

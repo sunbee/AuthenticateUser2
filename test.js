@@ -5,6 +5,7 @@ var superagent = require("superagent");
 var express = require("express");
 var httpStatus = require("http-status");
 var _ = require('underscore');
+var bodyParser = require("body-parser");
 
 var URL_ROOT = 'http://alterego-sunbee.c9users.io'
 // CRUD operations (Test) using 'Alert' model
@@ -17,6 +18,20 @@ describe("Test Suite", function() {
         var app = express();
         
         var models = require("./models.js")(wagner);
+        
+        app.use(bodyParser.json());
+        // app.use(wagner.invoke(function() {
+        //     return function(req, res, next) {
+        //         console.log("FROM MIDDLEWARE ***" + req);
+        //         if (req.body) {
+        //             console.log("BODY: " + JSON.stringify(req.body))
+        //         }
+        //         if (req.query) {
+        //             console.log("QUERY: " + JSON.stringify(req.query));
+        //         }
+        //     next(); 
+        //     }
+        // }));
         app.use(require("./api.js")(wagner));
         
         server = app.listen(process.env.PORT);
@@ -122,7 +137,7 @@ describe("Test Suite", function() {
         })
     });
     
-        it("Compares user name and password", function(done) {
+    it("Compares user name and password to generate token", function(done) {
         var endpoint_post = URL_ROOT + '/authenticate';
         console.log(endpoint_post);
         
@@ -145,4 +160,38 @@ describe("Test Suite", function() {
         })
     });
 
-});
+    it("Uses token for entry", function(done) {
+        var endpoint_post = URL_ROOT + '/authenticate';
+        var endpoint_getUsers = URL_ROOT + '/users?token=';
+        console.log(endpoint_post);
+        
+        var pvSindhu = new User({
+          name     : "Sindhu PV",
+          password : "JaiHind",
+          admin    : true,
+        });
+        pvSindhu.save(function(err, doc) {
+            assert.ifError(err);
+            superagent.post(endpoint_post)
+                .send(pvSindhu)
+                .set('Accept', 'application/json')
+                .end(function(err, res) {
+                    assert.ifError(err);
+                    endpoint_getUsers += res.body.token;
+                    console.log(endpoint_getUsers);
+                    superagent.get(endpoint_getUsers, function(err, res) {
+                        assert.ifError(err);
+                        console.log(res.body.Users);
+                        assert.equal(res.body.Users.length, 1);
+                        assert.equal(res.body.Users[0].name, pvSindhu.name);
+                        assert.equal(res.body.Users[0].password, pvSindhu.password);
+                        assert.equal(res.body.Users[0].admin, pvSindhu.admin);
+                        done();
+                    }); // end GET
+            }); // end POST
+            
+        }); // end SAVE
+    }); // end it
+
+}); // end describe
+
