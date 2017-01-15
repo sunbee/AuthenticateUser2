@@ -19,19 +19,6 @@ describe("Test Suite", function() {
         
         var models = require("./models.js")(wagner);
         
-        app.use(bodyParser.json());
-        // app.use(wagner.invoke(function() {
-        //     return function(req, res, next) {
-        //         console.log("FROM MIDDLEWARE ***" + req);
-        //         if (req.body) {
-        //             console.log("BODY: " + JSON.stringify(req.body))
-        //         }
-        //         if (req.query) {
-        //             console.log("QUERY: " + JSON.stringify(req.query));
-        //         }
-        //     next(); 
-        //     }
-        // }));
         app.use(require("./api.js")(wagner));
         
         server = app.listen(process.env.PORT);
